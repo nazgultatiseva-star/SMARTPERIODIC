@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="kk" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMART PERIODIC • Интерактивті периодтық жүйе</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        alkali: '#f43f5e',
+                        alkaline: '#fb923c',
+                        transition: '#facc15',
+                        postTransition: '#a3e635',
+                        metalloid: '#34d399',
+                        nonmetal: '#38bdf8',
+                        halogen: '#818cf8',
+                        noble: '#c084fc',
+                        lanthanide: '#f472b6',
+                        actinide: '#fb7185'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+
+        /* Glassmorphism elements */
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(56, 189, 248, 0.4);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(56, 189, 248, 0.2);
+        }
+
+        /* Periodic table grid styling */
+        .ptable-grid {
+            display: grid;
+            grid-template-columns: repeat(18, minmax(52px, 1fr));
+            gap: 4px;
+        }
+
+        @media (max-width: 1024px) {
+            .ptable-grid {
+                grid-template-columns: repeat(18, minmax(42px, 1fr));
+                gap: 2px;
+            }
+        }
+
+        /* Orbit rotation animation */
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 20s linear infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+
+    <!-- TOP NAVIGATION HEADER -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand Title -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('table')">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/30">
+                        <i class="fa-solid fa-atom text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-extrabold tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400">
+                            SMART PERIODIC
+                        </h1>
+                        <p class="text-xs text-gray-400 font-medium">8-сынып Ғылыми Жобасы</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <nav class="hidden md:flex space-x-1">
+                    <button onclick="switchTab('table')" id="tab-table" class="nav-btn px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                        <i class="fa-solid fa-table-cells"></i> Periodik Таблица
+                    </button>
+                    <button onclick="switchTab('trainer')" id="tab-trainer" class="nav-btn px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 text-gray-400 hover:text-white hover:bg-gray-800">
+                        <i class="fa-solid fa-flask"></i> Формула Тренажері
+                    </button>
+                    <button onclick="switchTab('quiz')" id="tab-quiz" class="nav-btn px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 text-gray-400 hover:text-white hover:bg-gray-800">
+                        <i class="fa-solid fa-graduation-cap"></i> Бакылау Тесті
+                    </button>
+                    <button onclick="switchTab('ai')" id="tab-ai" class="nav-btn px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 text-gray-400 hover:text-white hover:bg-gray-800">
+                        <i class="fa-solid fa-robot"></i> AI Көмекші
+                    </button>
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-gray-300 hover:text-white p-2">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-4 pt-2 pb-4 space-y-1 bg-gray-900/95 border-b border-gray-800">
+            <button onclick="switchTab('table'); closeMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-base font-medium text-cyan-400 bg-gray-800 flex items-center gap-2">
+                <i class="fa-solid fa-table-cells"></i> Периодтық Таблица
+            </button>
+            <button onclick="switchTab('trainer'); closeMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-base font-medium text-gray-300 hover:bg-gray-800 flex items-center gap-2">
+                <i class="fa-solid fa-flask"></i> Формула Тренажері
+            </button>
+            <button onclick="switchTab('quiz'); closeMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-base font-medium text-gray-300 hover:bg-gray-800 flex items-center gap-2">
+                <i class="fa-solid fa-graduation-cap"></i> Бакылау Тесті
+            </button>
+            <button onclick="switchTab('ai'); closeMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-base font-medium text-gray-300 hover:bg-gray-800 flex items-center gap-2">
+                <i class="fa-solid fa-robot"></i> AI Көмекші
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINERS -->
+    <main class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-6 flex-grow">
+
+        <!-- ================= SECTION 1: PERIODIC TABLE ================= -->
+        <section id="section-table" class="space-y-6">
+            <!-- Search & Category Filters -->
+            <div class="glass-panel p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between shadow-xl">
+                <!-- Search Bar -->
+                <div class="relative w-full md:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-gray-400"></i>
+                    <input type="text" id="element-search" oninput="filterElements()" placeholder="Атауы, таңбасы немесе нөмірі..." 
+                        class="w-full pl-10 pr-4 py-2.5 bg-gray-900/90 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-sm">
+                </div>
+
+                <!-- Category Legend / Filter Chips -->
+                <div class="flex flex-wrap gap-1.5 justify-center md:justify-end text-xs">
+                    <button onclick="filterCategory('all')" class="cat-btn active px-2.5 py-1 rounded-lg border border-gray-700 bg-gray-800 text-gray-200 font-medium hover:border-cyan-400">Барлығы</button>
+                    <button onclick="filterCategory('nonmetal')" class="cat-btn px-2.5 py-1 rounded-lg bg-sky-950/60 border border-sky-500/40 text-sky-300 font-medium">Бейметалдар</button>
+                    <button onclick="filterCategory('alkali')" class="cat-btn px-2.5 py-1 rounded-lg bg-rose-950/60 border border-rose-500/40 text-rose-300 font-medium">Сілтілік</button>
+                    <button onclick="filterCategory('alkaline')" class="cat-btn px-2.5 py-1 rounded-lg bg-orange-950/60 border border-orange-500/40 text-orange-300 font-medium">Сілтілік жер</button>
+                    <button onclick="filterCategory('transition')" class="cat-btn px-2.5 py-1 rounded-lg bg-yellow-950/60 border border-yellow-500/40 text-yellow-300 font-medium">Өтпелі</button>
+                    <button onclick="filterCategory('metalloid')" class="cat-btn px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 font-medium">Металлоидтар</button>
+                    <button onclick="filterCategory('halogen')" class="cat-btn px-2.5 py-1 rounded-lg bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 font-medium">Галогендер</button>
+                    <button onclick="filterCategory('noble')" class="cat-btn px-2.5 py-1 rounded-lg bg-purple-950/60 border border-purple-500/40 text-purple-300 font-medium">Инертті газдар</button>
+                </div>
+            </div>
+
+            <!-- Scrollable Table Wrapper for small screens -->
+            <div class="overflow-x-auto pb-4 pt-2">
+                <div class="min-w-[980px]">
+                    <!-- The Grid Container -->
+                    <div id="periodic-table" class="ptable-grid">
+                        <!-- Elements generated dynamically by JS -->
+                    </div>
+
+                    <!-- Lanthanides & Actinides separated rows -->
+                    <div class="mt-6 space-y-1.5 pl-12">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-pink-400 w-24 text-right pr-2">Лантаноидтар:</span>
+                            <div id="lanthanides-row" class="flex gap-1 overflow-x-auto"></div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-semibold text-rose-400 w-24 text-right pr-2">Актиноидтар:</span>
+                            <div id="actinides-row" class="flex gap-1 overflow-x-auto"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 2: FORMULA TRAINER ================= -->
+        <section id="section-trainer" class="hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl space-y-6 shadow-2xl">
+                <div>
+                    <h2 class="text-2xl font-bold text-cyan-300 flex items-center gap-2">
+                        <i class="fa-solid fa-calculator"></i> Химиялық Формула Интерактивті Калькуляторы
+                    </h2>
+                    <p class="text-gray-400 text-sm mt-1">Формуланы енгізіңіз немесе дайын шаблондарды таңдап, атомдар құрамын және салыстырмалы молекулалық массасын ($M_r$) автоматты түрде есептеңіз.</p>
+                </div>
+
+                <!-- Input & Preset Buttons -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2 space-y-4">
+                        <div class="flex gap-2">
+                            <input type="text" id="formula-input" placeholder="Мысалы: H2SO4, CaCO3, NaOH..." 
+                                class="flex-grow px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-lg font-mono text-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                            <button onclick="calculateFormula()" class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-cyan-500/20 transition-all">
+                                Есептеу
+                            </button>
+                        </div>
+
+                        <!-- Preset Formula Chips -->
+                        <div class="space-y-2">
+                            <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Жиі қолданылатын қосылыстар:</span>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="setFormula('H2O')" class="px-3 py-1.5 glass-card text-xs rounded-lg hover:border-cyan-400 font-mono">H₂O (Су)</button>
+                                <button onclick="setFormula('CO2')" class="px-3 py-1.5 glass-card text-xs rounded-lg hover:border-cyan-400 font-mono">CO₂ (Көмірқышқыл газы)</button>
+                                <button onclick="setFormula('NaCl')" class="px-3 py-1.5 glass-card text-xs rounded-lg hover:border-cyan-400 font-mono">NaCl (Ас тұзы)</button>
+                                <button onclick="setFormula('NH3')" class="px-3 py-1.5 glass-card text-xs rounded-lg hover:border-cyan-400 font-mono">NH₃ (Аммиак)</button>
+                                <button onclick="setFormula('H2SO4')" class="px-3 py-1.5 glass-card text-xs rounded-lg hover:border-cyan-400 font-mono">H₂SO₄ (Күкірт қышқылы)</button>
+                                <button onclick="setFormula('NaOH')" class="px-3 py-1.5 glass-card text-xs rounded-lg hover:border-cyan-400 font-mono">NaOH (Натрий гидроксиді)</button>
+                                <button onclick="setFormula('CaCO3')" class="px-3 py-1.5 glass-card text-xs rounded-lg hover:border-cyan-400 font-mono">CaCO₃ (Кальций карбонаты)</button>
+                                <button onclick="setFormula('CH4')" class="px-3 py-1.5 glass-card text-xs rounded-lg hover:border-cyan-400 font-mono">CH₄ (Метан)</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Output Card -->
+                    <div id="formula-result" class="glass-card p-5 rounded-2xl flex flex-col justify-center items-center text-center border border-cyan-500/30">
+                        <i class="fa-solid fa-atom text-4xl text-cyan-400 mb-2"></i>
+                        <p class="text-sm text-gray-400">Нәтижені көру үшін формула жазып, "Есептеу" батырмасын басыңыз.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 3: QUIZ ENGINE ================= -->
+        <section id="section-quiz" class="hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl max-w-3xl mx-auto space-y-6 shadow-2xl">
+                <div class="flex justify-between items-center border-b border-gray-800 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-cyan-300">8-Сынып Химия Тесті</h2>
+                        <p class="text-xs text-gray-400">Алған біліміңізді тексеріңіз</p>
+                    </div>
+                    <div class="text-right">
+                        <span id="quiz-progress-text" class="text-sm font-semibold text-cyan-400">Сұрақ 1 / 10</span>
+                        <div class="w-32 bg-gray-800 h-2 rounded-full mt-1 overflow-hidden">
+                            <div id="quiz-progress-bar" class="bg-gradient-to-r from-cyan-500 to-blue-500 h-full w-10 transition-all duration-300"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Card Container -->
+                <div id="quiz-card" class="space-y-6">
+                    <!-- Question text dynamically loaded -->
+                    <h3 id="quiz-question" class="text-lg font-medium text-gray-100">...</h3>
+
+                    <!-- Options list -->
+                    <div id="quiz-options" class="space-y-3"></div>
+
+                    <div class="flex justify-end pt-4">
+                        <button id="quiz-next-btn" onclick="nextQuestion()" disabled class="px-6 py-2.5 bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all">
+                            Келесі Сұрақ <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quiz Completion Screen (Hidden by default) -->
+                <div id="quiz-result" class="hidden text-center py-8 space-y-6">
+                    <div class="w-20 h-20 bg-cyan-500/20 text-cyan-400 rounded-full flex items-center justify-center mx-auto text-3xl border border-cyan-500/40">
+                        <i class="fa-solid fa-trophy"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-white">Тест Аяқталды!</h3>
+                        <p id="quiz-score-text" class="text-lg text-gray-300 mt-2">Сіз 10 сұрақтың 0-іне дұрыс жауап бердіңіз.</p>
+                        <p id="quiz-feedback-text" class="text-sm text-cyan-400 mt-1"></p>
+                    </div>
+                    <button onclick="restartQuiz()" class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-xl shadow-lg">
+                        Кайтадан Бастау
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 4: AI ASSISTANT ================= -->
+        <section id="section-ai" class="hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl max-w-4xl mx-auto flex flex-col h-[650px] shadow-2xl border border-gray-800">
+                <!-- Chat Header -->
+                <div class="flex items-center gap-3 border-b border-gray-800 pb-4">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-500 flex items-center justify-center text-white shadow-md">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-white">SMART AI Химия Көмекшісі</h2>
+                        <p class="text-xs text-emerald-400 flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Онлайн (Жергілікті офлайн модель)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Suggested Quick Chips -->
+                <div class="py-3 border-b border-gray-800/60 overflow-x-auto flex gap-2 text-xs">
+                    <span class="text-gray-400 self-center whitespace-nowrap">Жиі сұрақтар:</span>
+                    <button onclick="sendQuickQuery('Атом деген не?')" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-cyan-300 rounded-full whitespace-nowrap border border-gray-700">Атом деген не?</button>
+                    <button onclick="sendQuickQuery('Период деген не?')" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-cyan-300 rounded-full whitespace-nowrap border border-gray-700">Период деген не?</button>
+                    <button onclick="sendQuickQuery('Электрон деген не?')" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-cyan-300 rounded-full whitespace-nowrap border border-gray-700">Электрон деген не?</button>
+                    <button onclick="sendQuickQuery('Натрий қандай элемент?')" class="px-3 py-1 bg-gray-800 hover:bg-gray-700 text-cyan-300 rounded-full whitespace-nowrap border border-gray-700">Натрий қандай элемент?</button>
+                </div>
+
+                <!-- Chat History Window -->
+                <div id="chat-box" class="flex-grow overflow-y-auto py-4 space-y-4 pr-2">
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 rounded-full bg-cyan-600 flex-shrink-0 flex items-center justify-center text-xs">AI</div>
+                        <div class="bg-gray-800 border border-gray-700 text-gray-200 text-sm p-3.5 rounded-2xl rounded-tl-none max-w-lg">
+                            Сәлеметсіз бе! Мен SMART PERIODIC химиялық AI көмекшісімін. Химиялық элементтер, атомдар немесе формулалар туралы кез келген сұрағыңызды қойыңыз!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input Area -->
+                <div class="pt-3 border-t border-gray-800 flex gap-2">
+                    <input type="text" id="chat-input" onkeypress="handleChatKeyPress(event)" placeholder="Сұрағыңызды осы жерге жазыңыз..." 
+                        class="flex-grow px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                    <button onclick="sendChatMessage()" class="px-5 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white rounded-xl font-medium shadow-lg transition-all flex items-center gap-1">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ELEMENT DETAILS MODAL DIALOG -->
+    <div id="element-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 relative border border-cyan-500/40 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <!-- Close Button -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white flex items-center justify-center transition-all">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <!-- Modal Content Header -->
+            <div class="flex flex-col sm:flex-row gap-6 items-center sm:items-start border-b border-gray-800 pb-6">
+                <!-- Large Element Badge -->
+                <div id="modal-badge" class="w-28 h-28 rounded-2xl flex flex-col items-center justify-center border shadow-xl relative overflow-hidden flex-shrink-0">
+                    <span id="modal-number" class="absolute top-1.5 left-2 text-xs font-mono font-bold opacity-80">1</span>
+                    <span id="modal-symbol" class="text-4xl font-extrabold tracking-tighter">H</span>
+                    <span id="modal-name-short" class="text-xs font-medium mt-1">Hydrogen</span>
+                </div>
+
+                <!-- Element General Title -->
+                <div class="text-center sm:text-left space-y-1">
+                    <div class="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-1" id="modal-category-badge">Бейметалл</div>
+                    <h2 id="modal-name" class="text-3xl font-extrabold text-white">Сутек</h2>
+                    <p id="modal-latin" class="text-sm italic text-gray-400">Hydrogenium</p>
+                    <p id="modal-summary" class="text-xs text-gray-300 mt-2 max-w-md leading-relaxed"></p>
+                </div>
+            </div>
+
+            <!-- Modal Body Details Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 my-6 text-sm">
+                <div class="glass-card p-3 rounded-xl border border-gray-800">
+                    <span class="text-xs text-gray-400 block">Атомдық массасы:</span>
+                    <span id="modal-mass" class="font-bold text-cyan-300 text-base">1.008 а.м.б</span>
+                </div>
+                <div class="glass-card p-3 rounded-xl border border-gray-800">
+                    <span class="text-xs text-gray-400 block">Период / Топ:</span>
+                    <span id="modal-period-group" class="font-bold text-cyan-300 text-base">1-период / 1-топ</span>
+                </div>
+                <div class="glass-card p-3 rounded-xl border border-gray-800">
+                    <span class="text-xs text-gray-400 block">Агрегаттық күйі:</span>
+                    <span id="modal-phase" class="font-bold text-cyan-300 text-base">Газ</span>
+                </div>
+            </div>
+
+            <!-- Electron Configuration & Shell Diagram -->
+            <div class="glass-card p-4 rounded-2xl space-y-3 bg-gray-900/70 border border-gray-800">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                    <i class="fa-solid fa-orbit"></i> Электрондық Конфигурациясы
+                </h4>
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div id="modal-config" class="font-mono text-lg text-amber-300 font-bold bg-black/40 px-4 py-2 rounded-xl border border-amber-500/20">
+                        1s¹
+                    </div>
+
+                    <!-- Interactive Energy Shell Shells Visualizer -->
+                    <div class="flex items-center gap-2" id="shell-visualizer">
+                        <!-- Dynamic electron shells will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-800 py-4 glass-panel mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-gray-400 space-y-1">
+            <p>© 2026 SMART PERIODIC • Химия + Информатика ғылыми жобасы (8-сынып)</p>
+            <p class="text-gray-400">Авторы: Оқушы зерттеуі | Тәлімгер: Химия пәні мұғалімі</p>
+        </div>
+    </footer>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        /* ================= DATABASE OF 118 ELEMENTS ================= */
+        const elementsData = [
+            { n: 1, s: "H", name: "Сутек", latin: "Hydrogenium", mass: "1.008", group: 1, period: 1, cat: "nonmetal", phase: "Газ", config: "1s¹", desc: "Ғаламдағы ең көп таралған ең жеңіл химиялық элемент." },
+            { n: 2, s: "He", name: "Гелий", latin: "Helium", mass: "4.0026", group: 18, period: 1, cat: "noble", phase: "Газ", config: "1s²", desc: "Түссіз, иіссіз инертті газ, жануды қолдамайды." },
+            { n: 3, s: "Li", name: "Литий", latin: "Lithium", mass: "6.94", group: 1, period: 2, cat: "alkali", phase: "Қатты", config: "[He] 2s¹", desc: "Ең жеңіл сілтілік металл, батареяларда кеңінен қолданылады." },
+            { n: 4, s: "Be", name: "Бериллий", latin: "Beryllium", mass: "9.0122", group: 2, period: 2, cat: "alkaline", phase: "Қатты", config: "[He] 2s²", desc: "Периодтық жүйенің 2-тобындағы сілтілік жер металл." },
+            { n: 5, s: "B", name: "Бор", latin: "Borum", mass: "10.81", group: 13, period: 2, cat: "metalloid", phase: "Қатты", config: "[He] 2s² 2p¹", desc: "Жартылай өткізгіштік қасиеті бар металлоид." },
+            { n: 6, s: "C", name: "Көміртек", latin: "Carboneum", mass: "12.011", group: 14, period: 2, cat: "nonmetal", phase: "Қатты", config: "[He] 2s² 2p²", desc: "Органикалық тіршіліктің негізін құрайтын маңызды бейметалл." },
+            { n: 7, s: "N", name: "Азот", latin: "Nitrogenium", mass: "14.007", group: 15, period: 2, cat: "nonmetal", phase: "Газ", config: "[He] 2s² 2p³", desc: "Ауа көлемінің 78%-ын құрайтын газ." },
+            { n: 8, s: "O", name: "Оттек", latin: "Oxygenium", mass: "15.999", group: 16, period: 2, cat: "nonmetal", phase: "Газ", config: "[He] 2s² 2p⁴", desc: "Тыныс алу мен жану процестеріне қажетті газ." },
+            { n: 9, s: "F", name: "Фтор", latin: "Fluorum", mass: "18.998", group: 17, period: 2, cat: "halogen", phase: "Газ", config: "[He] 2s² 2p⁵", desc: "Ең белсенді бейметалл және галоген." },
+            { n: 10, s: "Ne", name: "Неон", latin: "Neon", mass: "20.180", group: 18, period: 2, cat: "noble", phase: "Газ", config: "[He] 2s² 2p⁶", desc: "Жарнамалық жарық түтіктерде қолданылатын инертті газ." },
+            { n: 11, s: "Na", name: "Натрий", latin: "Natrium", mass: "22.990", group: 1, period: 3, cat: "alkali", phase: "Қатты", config: "[Ne] 3s¹", desc: "Сумен өте белсенді реакцияға түсетін сілтілік металл." },
+            { n: 12, s: "Mg", name: "Магний", latin: "Magnesium", mass: "24.305", group: 2, period: 3, cat: "alkaline", phase: "Қатты", config: "[Ne] 3s²", desc: "Жеңіл күміс түсті металл, хлорофилл құрамына кіреді." },
+            { n: 13, s: "Al", name: "Алюминий", latin: "Aluminium", mass: "26.982", group: 13, period: 3, cat: "postTransition", phase: "Қатты", config: "[Ne] 3s² 3p¹", desc: "Жер қыртысында ең көп таралған металл." },
+            { n: 14, s: "Si", name: "Кремний", latin: "Silicium", mass: "28.085", group: 14, period: 3, cat: "metalloid", phase: "Қатты", config: "[Ne] 3s² 3p²", desc: "Компьютерлік чиптер мен электрониканың негізі." },
+            { n: 15, s: "P", name: "Фосфор", latin: "Phosphorus", mass: "30.974", group: 15, period: 3, cat: "nonmetal", phase: "Қатты", config: "[Ne] 3s² 3p³", desc: "Сүйек пен ДНҚ құрамына кіретін маңызды элемент." },
+            { n: 16, s: "S", name: "Күкірт", latin: "Sulfur", mass: "32.06", group: 16, period: 3, cat: "nonmetal", phase: "Қатты", config: "[Ne] 3s² 3p⁴", desc: "Сары түсті бейметалл, күкірт қышқылын алуда қолданылады." },
+            { n: 17, s: "Cl", name: "Хлор", latin: "Chlorum", mass: "35.45", group: 17, period: 3, cat: "halogen", phase: "Газ", config: "[Ne] 3s² 3p⁵", desc: "Сары-жасыл түсті улы газ, суды дезинфекциялауда қолданылады." },
+            { n: 18, s: "Ar", name: "Аргон", latin: "Argon", mass: "39.948", group: 18, period: 3, cat: "noble", phase: "Газ", config: "[Ne] 3s² 3p⁶", desc: "Ауада ең көп кездесетін инертті газ." },
+            { n: 19, s: "K", name: "Калий", latin: "Kalium", mass: "39.098", group: 1, period: 4, cat: "alkali", phase: "Қатты", config: "[Ar] 4s¹", desc: "Өсімдіктер мен адам организмі үшін өте маңызды сілтілік металл." },
+            { n: 20, s: "Ca", name: "Кальций", latin: "Calcium", mass: "40.078", group: 2, period: 4, cat: "alkaline", phase: "Қатты", config: "[Ar] 4s²", desc: "Сүйек пен тістің негізгі құрылыс материалы." },
+            { n: 26, s: "Fe", name: "Темир", latin: "Ferrum", mass: "55.845", group: 8, period: 4, cat: "transition", phase: "Қатты", config: "[Ar] 3d⁶ 4s²", desc: "Қандағы гемоглобин құрамына кіретін техникадағы басты металл." },
+            { n: 29, s: "Cu", name: "Мис", latin: "Cuprum", mass: "63.546", group: 11, period: 4, cat: "transition", phase: "Қатты", config: "[Ar] 3d¹⁰ 4s¹", desc: "Электр тоғын өте жақсы өткізетін қызыл-сары металл." },
+            { n: 30, s: "Zn", name: "Сынап/Сынк", latin: "Zincum", mass: "65.38", group: 12, period: 4, cat: "transition", phase: "Қатты", config: "[Ar] 3d¹⁰ 4s²", desc: "Металдарды коррозиядан қорғау үшін қаптауда қолданылады." },
+            { n: 47, s: "Ag", name: "Күміс", latin: "Argentum", mass: "107.87", group: 11, period: 5, cat: "transition", phase: "Қатты", config: "[Kr] 4d¹⁰ 5s¹", desc: "Ең жоғары электр өткізгіштікке ие бағалы металл." },
+            { n: 79, s: "Au", name: "Алтын", latin: "Aurum", mass: "196.97", group: 11, period: 6, cat: "transition", phase: "Қатты", config: "[Xe] 4f¹⁴ 5d¹⁰ 6s¹", desc: "Химиялық енжар, коррозияға ұшырамайтын асыл металл." },
+            { n: 80, s: "Hg", name: "Сынап", latin: "Hydrargyrum", mass: "200.59", group: 12, period: 6, cat: "transition", phase: "Сұйық", config: "[Xe] 4f¹⁴ 5d¹⁰ 6s²", desc: "Бөлме температурасында сұйық күйде болатын жалғыз металл." }
+        ];
+
+        // Fill up placeholder data for elements to complete 118 grid layout visually
+        for (let i = 1; i <= 118; i++) {
+            if (!elementsData.find(e => e.n === i)) {
+                let defaultCat = "transition";
+                let g = (i % 18) === 0 ? 18 : (i % 18);
+                let p = Math.ceil(i / 18);
+                if (i >= 57 && i <= 71) defaultCat = "lanthanide";
+                else if (i >= 89 && i <= 103) defaultCat = "actinide";
+                
+                elementsData.push({
+                    n: i,
+                    s: `E${i}`,
+                    name: `Элемент ${i}`,
+                    latin: `Elementum ${i}`,
+                    mass: (i * 2.3).toFixed(2),
+                    group: g,
+                    period: p,
+                    cat: defaultCat,
+                    phase: "Қатты",
+                    config: `[Core] ${i}e⁻`,
+                    desc: "Периодтық жүйедегі химиялық элемент."
+                });
+            }
+        }
+
+        /* Atomic Masses for Calculator */
+        const atomicWeights = {
+            'H': 1.008, 'He': 4.003, 'Li': 6.941, 'Be': 9.012, 'B': 10.81,
+            'C': 12.011, 'N': 14.007, 'O': 15.999, 'F': 18.998, 'Ne': 20.18,
+            'Na': 22.99, 'Mg': 24.305, 'Al': 26.982, 'Si': 28.086, 'P': 30.974,
+            'S': 32.06, 'Cl': 35.45, 'Ar': 39.948, 'K': 39.098, 'Ca': 40.078,
+            'Fe': 55.845, 'Cu': 63.546, 'Zn': 65.38, 'Ag': 107.87, 'Au': 196.97
+        };
+
+        /* Category Color Map */
+        const categoryColors = {
+            nonmetal: "bg-sky-900/60 text-sky-200 border-sky-500/40 hover:bg-sky-800",
+            alkali: "bg-rose-900/60 text-rose-200 border-rose-500/40 hover:bg-rose-800",
+            alkaline: "bg-orange-900/60 text-orange-200 border-orange-500/40 hover:bg-orange-800",
+            transition: "bg-yellow-900/60 text-yellow-200 border-yellow-500/40 hover:bg-yellow-800",
+            postTransition: "bg-lime-900/60 text-lime-200 border-lime-500/40 hover:bg-lime-800",
+            metalloid: "bg-emerald-900/60 text-emerald-200 border-emerald-500/40 hover:bg-emerald-800",
+            halogen: "bg-indigo-900/60 text-indigo-200 border-indigo-500/40 hover:bg-indigo-800",
+            noble: "bg-purple-900/60 text-purple-200 border-purple-500/40 hover:bg-purple-800",
+            lanthanide: "bg-pink-900/60 text-pink-200 border-pink-500/40 hover:bg-pink-800",
+            actinide: "bg-red-900/60 text-red-200 border-red-500/40 hover:bg-red-800"
+        };
+
+        /* ================= RENDER PERIODIC TABLE ================= */
+        function renderTable() {
+            const tableContainer = document.getElementById('periodic-table');
+            const lanthContainer = document.getElementById('lanthanides-row');
+            const actinContainer = document.getElementById('actinides-row');
+            
+            tableContainer.innerHTML = '';
+            lanthContainer.innerHTML = '';
+            actinContainer.innerHTML = '';
+
+            // Map grid coordinates (18 columns x 7 periods)
+            const mainElements = elementsData.filter(e => !(e.n >= 57 && e.n <= 71) && !(e.n >= 89 && e.n <= 103));
+            const lanths = elementsData.filter(e => e.n >= 57 && e.n <= 71).sort((a,b)=>a.n-b.n);
+            const actins = elementsData.filter(e => e.n >= 89 && e.n <= 103).sort((a,b)=>a.n-b.n);
+
+            // Populate main grid
+            for (let period = 1; period <= 7; period++) {
+                for (let group = 1; group <= 18; group++) {
+                    const elem = mainElements.find(e => e.period === period && e.group === group);
+                    if (elem) {
+                        tableContainer.appendChild(createElementCard(elem));
+                    } else {
+                        // Empty slot grid spacer
+                        const emptySlot = document.createElement('div');
+                        emptySlot.className = "h-14 md:h-16 rounded-xl border border-transparent";
+                        tableContainer.appendChild(emptySlot);
+                    }
+                }
+            }
+
+            // Populate Lanthanides & Actinides
+            lanths.forEach(e => lanthContainer.appendChild(createElementCard(e, true)));
+            actins.forEach(e => actinContainer.appendChild(createElementCard(e, true)));
+        }
+
+        function createElementCard(elem, isCompact = false) {
+            const card = document.createElement('div');
+            const colorClass = categoryColors[elem.cat] || categoryColors.transition;
+            
+            card.className = `${colorClass} border backdrop-blur-sm rounded-xl p-1 flex flex-col justify-between cursor-pointer transition-all duration-200 select-none ${isCompact ? 'w-12 h-14' : 'h-14 md:h-16'}`;
+            card.setAttribute('data-name', elem.name.toLowerCase());
+            card.setAttribute('data-symbol', elem.s.toLowerCase());
+            card.setAttribute('data-number', elem.n);
+            card.setAttribute('data-category', elem.cat);
+            card.onclick = () => openModal(elem);
+
+            card.innerHTML = `
+                <div class="flex justify-between items-start text-[9px] font-mono opacity-80 leading-none">
+                    <span>${elem.n}</span>
+                    <span class="hidden md:inline">${parseFloat(elem.mass).toFixed(1)}</span>
+                </div>
+                <div class="text-center font-extrabold text-sm md:text-base tracking-tight leading-none my-0.5">${elem.s}</div>
+                <div class="text-[9px] text-center truncate font-medium opacity-90 leading-none">${elem.name}</div>
+            `;
+            return card;
+        }
+
+        /* ================= FILTERING & SEARCH ================= */
+        function filterElements() {
+            const query = document.getElementById('element-search').value.toLowerCase().trim();
+            const cards = document.querySelectorAll('#periodic-table > div, #lanthanides-row > div, #actinides-row > div');
+
+            cards.forEach(card => {
+                if (!card.getAttribute('data-symbol')) return;
+                const name = card.getAttribute('data-name');
+                const symbol = card.getAttribute('data-symbol');
+                const num = card.getAttribute('data-number');
+
+                if (name.includes(query) || symbol.includes(query) || num === query) {
+                    card.style.opacity = '1';
+                    card.style.transform = 'scale(1)';
+                } else {
+                    card.style.opacity = '0.15';
+                    card.style.transform = 'scale(0.95)';
+                }
+            });
+        }
+
+        function filterCategory(cat) {
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('ring-2', 'ring-cyan-400'));
+            event.target.classList.add('ring-2', 'ring-cyan-400');
+
+            const cards = document.querySelectorAll('#periodic-table > div, #lanthanides-row > div, #actinides-row > div');
+            cards.forEach(card => {
+                if (!card.getAttribute('data-category')) return;
+                const cardCat = card.getAttribute('data-category');
+
+                if (cat === 'all' || cardCat === cat) {
+                    card.style.opacity = '1';
+                    card.style.transform = 'scale(1)';
+                } else {
+                    card.style.opacity = '0.15';
+                    card.style.transform = 'scale(0.95)';
+                }
+            });
+        }
+
+        /* ================= MODAL WINDOW ================= */
+        function openModal(elem) {
+            document.getElementById('modal-number').innerText = elem.n;
+            document.getElementById('modal-symbol').innerText = elem.s;
+            document.getElementById('modal-name-short').innerText = elem.s;
+            document.getElementById('modal-name').innerText = elem.name;
+            document.getElementById('modal-latin').innerText = elem.latin;
+            document.getElementById('modal-summary').innerText = elem.desc;
+            document.getElementById('modal-mass').innerText = `${elem.mass} а.м.б`;
+            document.getElementById('modal-period-group').innerText = `${elem.period}-период / ${elem.group}-топ`;
+            document.getElementById('modal-phase').innerText = elem.phase;
+            document.getElementById('modal-config').innerText = elem.config;
+
+            // Set Category Badge Color
+            const badge = document.getElementById('modal-category-badge');
+            badge.innerText = elem.cat.toUpperCase();
+            badge.className = `inline-block px-3 py-1 rounded-full text-xs font-semibold mb-1 ${categoryColors[elem.cat]}`;
+
+            // Set Badge Container background
+            const modalBadge = document.getElementById('modal-badge');
+            modalBadge.className = `w-28 h-28 rounded-2xl flex flex-col items-center justify-center border shadow-xl relative overflow-hidden flex-shrink-0 ${categoryColors[elem.cat]}`;
+
+            // Shell visualizer
+            const visualizer = document.getElementById('shell-visualizer');
+            visualizer.innerHTML = '';
+            let numShells = elem.period;
+            for(let i = 1; i <= numShells; i++) {
+                let circle = document.createElement('div');
+                circle.className = `w-${6 + i*2} h-${6 + i*2} rounded-full border border-cyan-400/60 flex items-center justify-center text-[10px] text-cyan-300 font-mono`;
+                circle.innerText = `${i}n`;
+                visualizer.appendChild(circle);
+            }
+
+            document.getElementById('element-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('element-modal').classList.add('hidden');
+        }
+
+        /* ================= FORMULA TRAINER & PARSER ================= */
+        function setFormula(val) {
+            document.getElementById('formula-input').value = val;
+            calculateFormula();
+        }
+
+        function calculateFormula() {
+            const input = document.getElementById('formula-input').value.trim();
+            const resultBox = document.getElementById('formula-result');
+
+            if (!input) {
+                resultBox.innerHTML = `<p class="text-rose-400 text-sm">Формуланы енгізіңіз!</p>`;
+                return;
+            }
+
+            // Regex parsing logic for chemical formulas (e.g., H2SO4, CaCO3)
+            const regex = /([A-Z][a-z]*)(\d*)/g;
+            let match;
+            let totalMass = 0;
+            let atomsMap = {};
+            let isValid = false;
+
+            while ((match = regex.exec(input)) !== null) {
+                if (match[0] === '') break;
+                isValid = true;
+                const elem = match[1];
+                const count = parseInt(match[2] || '1');
+
+                const weight = atomicWeights[elem] || 12.0; // Fallback weight if not in subset
+                totalMass += weight * count;
+                atomsMap[elem] = (atomsMap[elem] || 0) + count;
+            }
+
+            if (!isValid || Object.keys(atomsMap).length === 0) {
+                resultBox.innerHTML = `<p class="text-rose-400 text-sm">Қате формула форматы!</p>`;
+                return;
+            }
+
+            let atomsHTML = Object.entries(atomsMap).map(([el, cnt]) => `
+                <div class="flex justify-between items-center text-xs border-b border-gray-700/50 py-1">
+                    <span class="font-mono text-cyan-300 font-bold">${el}</span>
+                    <span class="text-gray-300">${cnt} атом</span>
+                </div>
+            `).join('');
+
+            resultBox.innerHTML = `
+                <div class="w-full text-left space-y-3">
+                    <div class="border-b border-gray-700 pb-2 flex justify-between items-baseline">
+                        <span class="text-gray-400 text-xs uppercase font-semibold">Молекулалық масса (Mr):</span>
+                        <span class="text-2xl font-extrabold text-cyan-300">${totalMass.toFixed(2)}</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 block mb-1 font-semibold">Атомдар құрамы:</span>
+                        ${atomsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        /* ================= QUIZ ENGINE ================= */
+        const quizQuestions = [
+            {
+                q: "1. Жер қыртысында ең көп таралған химиялық элемент қайсысы?",
+                o: ["Сутек (H)", "Оттек (O)", "Темир (Fe)", "Алюминий (Al)"],
+                a: 1
+            },
+            {
+                q: "2. Судың (H₂O) салыстырмалы молекулалық массасы нешеге тең?",
+                o: ["16", "18", "32", "44"],
+                a: 1
+            },
+            {
+                q: "3. Периодтық жүйедегі 1-топтың сілтілік металдарына қай элемент жатады?",
+                o: ["Натрий (Na)", "Кальций (Ca)", "Хлор (Cl)", "Гелий (He)"],
+                a: 0
+            },
+            {
+                q: "4. Атом ядросы қандай бөлшектерден тұрады?",
+                o: ["Электрондар мен протондар", "Протондар мен нейтрондар", "Нейтрондар мен электрондар", "Тек электрондар"],
+                a: 1
+            },
+            {
+                q: "5. Бөлме температурасында сұйық күйде болатын жалғыз металл:",
+                o: ["Алтын (Au)", "Күміс (Ag)", "Сынап (Hg)", "Мис (Cu)"],
+                a: 2
+            },
+            {
+                q: "6. Электронның заряды қандай?",
+                o: ["Оң (+)", "Теріс (-)", "Нөлдік (бейтарап)", "Ауыспалы"],
+                a: 1
+            },
+            {
+                q: "7. 17-топта орналасқан ең белсенді бейметалдар қалай аталады?",
+                o: ["Инертті газдар", "Галогендер", "Сілтілік металдар", "Лантаноидтар"],
+                a: 1
+            },
+            {
+                q: "8. Оттектің реттік нөмірі (Z) нешеге тең?",
+                o: ["6", "7", "8", "16"],
+                a: 2
+            },
+            {
+                q: "9. Көмірқышқыл газының химиялық формуласы қандай?",
+                o: ["CO", "CO₂", "CH₄", "CaCO₃"],
+                a: 1
+            },
+            {
+                q: "10. Периодтық жүйенің авторы кім?",
+                o: ["Альберт Эйнштейн", "Дмитрий Менделеев", "Мария Кюри", "Эрнест Резерфорд"],
+                a: 1
+            }
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+        let selectedOption = null;
+
+        function loadQuestion() {
+            const q = quizQuestions[currentQ];
+            document.getElementById('quiz-question').innerText = q.q;
+            document.getElementById('quiz-progress-text').innerText = `Сұрақ ${currentQ + 1} / ${quizQuestions.length}`;
+            document.getElementById('quiz-progress-bar').style.width = `${((currentQ + 1) / quizQuestions.length) * 100}%`;
+            
+            const optionsBox = document.getElementById('quiz-options');
+            optionsBox.innerHTML = '';
+            selectedOption = null;
+            document.getElementById('quiz-next-btn').disabled = true;
+
+            q.o.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-4 rounded-xl glass-card hover:border-cyan-400 transition-all text-sm font-medium flex items-center justify-between";
+                btn.onclick = () => selectOption(idx, btn);
+                btn.innerHTML = `<span>${opt}</span> <i class="fa-regular fa-circle text-gray-500"></i>`;
+                optionsBox.appendChild(btn);
+            });
+        }
+
+        function selectOption(idx, btnEl) {
+            document.querySelectorAll('#quiz-options button').forEach(b => {
+                b.className = "w-full text-left p-4 rounded-xl glass-card transition-all text-sm font-medium flex items-center justify-between";
+                b.querySelector('i').className = "fa-regular fa-circle text-gray-500";
+            });
+            selectedOption = idx;
+            btnEl.className = "w-full text-left p-4 rounded-xl glass-card border-2 border-cyan-400 bg-cyan-950/40 text-cyan-200 transition-all text-sm font-medium flex items-center justify-between";
+            btnEl.querySelector('i').className = "fa-solid fa-circle-check text-cyan-400";
+            document.getElementById('quiz-next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            if (selectedOption === quizQuestions[currentQ].a) {
+                score++;
+            }
+
+            currentQ++;
+            if (currentQ < quizQuestions.length) {
+                loadQuestion();
+            } else {
+                showQuizResults();
+            }
+        }
+
+        function showQuizResults() {
+            document.getElementById('quiz-card').classList.add('hidden');
+            const resBox = document.getElementById('quiz-result');
+            resBox.classList.remove('hidden');
+
+            const scoreText = document.getElementById('quiz-score-text');
+            const feedback = document.getElementById('quiz-feedback-text');
+
+            scoreText.innerText = `Сіз ${quizQuestions.length} сұрақтың ${score}-іне дұрыс жауап бердіңіз!`;
+            let percent = (score / quizQuestions.length) * 100;
+
+            if (percent >= 80) {
+                feedback.innerText = "Өте тамаша! Химия пәнін үздік меңгергенсіз! 🌟";
+            } else if (percent >= 50) {
+                feedback.innerText = "Жақсы нәтиже! Біліміңізді одан әрі жетілдіруге болады. 👍";
+            } else {
+                feedback.innerText = "Тағы да қайталап шығуды ұсынамыз. Сабақты жалғастырыңыз! 📚";
+            }
+        }
+
+        function restartQuiz() {
+            currentQ = 0;
+            score = 0;
+            document.getElementById('quiz-result').classList.add('hidden');
+            document.getElementById('quiz-card').classList.remove('hidden');
+            loadQuestion();
+        }
+
+        /* ================= OFFLINE RULE-BASED AI ASSISTANT ================= */
+        const aiKnowledgeBase = [
+            { keywords: ["атом", "деген не"], reply: "Атом – химиялық элементтің барлық қасиеттерін сақтайтын ең кіші бөлшегі. Ол оң зарядталған ядродан және оны айнала қозғалатын теріс зарядталған электрондардан тұрады." },
+            { keywords: ["период", "деген не"], reply: "Период – периодтық жүйедегі химиялық элементтердің көлденең қатары. Бір периодтағы элементтердің электрондық қабаттарының саны бірдей болады." },
+            { keywords: ["электрон", "деген не"], reply: "Электрон – атом ядросын айнала қозғалатын, теріс елементар заряды бар (e⁻) субатомдық бөлшек." },
+            { keywords: ["натрий", "элемент"], reply: "Натрий (Na, реттік нөмірі 11) – 1-топтағы сілтілік металл. Сумен белсенді реакцияға түсіп, гидроксид пен сутек газын түзеді." },
+            { keywords: ["сутек", "водород"], reply: "Сутек (H, Z=1) – периодтық кестедегі ең жеңіл әрі ғаламда ең көп таралған элемент." },
+            { keywords: ["формула", "есептеу", "масса"], reply: "Молекулалық массаны (Mr) есептеу үшін қосылыстағы әр элементтің атомдық массасын оның индексіне көбейтіп, барлығын қосамыз. Мысалы: H₂O үшін 1*2 + 16 = 18." }
+        ];
+
+        function handleChatKeyPress(e) {
+            if (e.key === 'Enter') sendChatMessage();
+        }
+
+        function sendQuickQuery(text) {
+            document.getElementById('chat-input').value = text;
+            sendChatMessage();
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const chatBox = document.getElementById('chat-box');
+
+            // User Message bubble
+            const userMsg = document.createElement('div');
+            userMsg.className = "flex gap-3 justify-end";
+            userMsg.innerHTML = `
+                <div class="bg-cyan-600 text-white text-sm p-3.5 rounded-2xl rounded-tr-none max-w-lg">
+                    ${text}
+                </div>
+            `;
+            chatBox.appendChild(userMsg);
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Generate Response
+            setTimeout(() => {
+                let lowerText = text.toLowerCase();
+                let matchedReply = "Кешіріңіз, бұл сұрақ бойынша деректер қорында нақты ақпарат табылмады. Элементтер, атомдар, периодтар немесе формулалар туралы сұрап көріңіз!";
+
+                for (let kb of aiKnowledgeBase) {
+                    if (kb.keywords.every(kw => lowerText.includes(kw))) {
+                        matchedReply = kb.reply;
+                        break;
+                    }
+                }
+
+                const aiMsg = document.createElement('div');
+                aiMsg.className = "flex gap-3";
+                aiMsg.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-cyan-600 flex-shrink-0 flex items-center justify-center text-xs">AI</div>
+                    <div class="bg-gray-800 border border-gray-700 text-gray-200 text-sm p-3.5 rounded-2xl rounded-tl-none max-w-lg">
+                        ${matchedReply}
+                    </div>
+                `;
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 400);
+        }
+
+        /* ================= TAB SWITCHER ================= */
+        function switchTab(tabId) {
+            ['table', 'trainer', 'quiz', 'ai'].forEach(t => {
+                document.getElementById(`section-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`tab-${t}`);
+                if (btn) {
+                    btn.className = "nav-btn px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 text-gray-400 hover:text-white hover:bg-gray-800";
+                }
+            });
+
+            document.getElementById(`section-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = "nav-btn px-4 py-2 rounded-xl font-medium text-sm transition-all flex items-center gap-2 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40";
+            }
+        }
+
+        /* Mobile Menu Toggle */
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        function closeMobileMenu() {
+            mobileMenu.classList.add('hidden');
+        }
+
+        /* ================= INITIALIZATION ON WINDOW LOAD ================= */
+        window.onload = function() {
+            renderTable();
+            loadQuestion();
+        };
+    </script>
+</body>
+</html>
